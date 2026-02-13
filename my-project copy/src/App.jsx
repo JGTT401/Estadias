@@ -4,48 +4,98 @@ import { AuthProvider } from "./components/AuthProvider";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import QRScanner from "./components/QRScanner";
-import PromotionPage from "./components/PromotionPage";
+import VisitPage from "./components/VisitPage";
+import MessagesList from "./components/MessagesList";
 import AdminPanel from "./components/AdminPanel";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+import "./index.css";
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <nav>
-          <Link to="/">Home</Link> | <Link to="/scan">Escanear QR</Link> |{" "}
-          <Link to="/admin">Admin</Link>
-        </nav>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <div>
-                Bienvenido. <Link to="/login">Entrar</Link>{" "}
-                <Link to="/register">Registrar</Link>
-              </div>
-            }
-          />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/scan"
-            element={
-              <ProtectedRoute>
-                <QRScanner />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/promotion/:id" element={<PromotionPage />} />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute requireAdmin={true}>
-                <AdminPanel />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <header className="bg-white shadow">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <Link to="/" className="text-xl font-bold text-primary">
+              PromoQR
+            </Link>
+            <nav className="space-x-4">
+              <Link
+                className="text-sm text-gray-600 hover:text-primary"
+                to="/messages"
+              >
+                Mensajes
+              </Link>
+              <Link
+                className="text-sm text-gray-600 hover:text-primary"
+                to="/scan"
+              >
+                Escanear
+              </Link>
+              <Link
+                className="text-sm text-gray-600 hover:text-primary"
+                to="/admin"
+              >
+                Admin
+              </Link>
+            </nav>
+          </div>
+        </header>
+
+        <main>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <div className="max-w-4xl mx-auto px-4 py-12">
+                  <div className="bg-white rounded-2xl shadow p-8">
+                    <h1 className="text-2xl font-semibold">
+                      Bienvenido a PromoQR
+                    </h1>
+                    <p className="text-gray-600 mt-2">
+                      Escanea QR para registrar visitas y reclama recompensas.
+                    </p>
+                  </div>
+                </div>
+              }
+            />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/scan"
+              element={
+                <ProtectedRoute>
+                  <QRScanner />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/visit/:id"
+              element={
+                <ProtectedRoute>
+                  <VisitPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <MessagesList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
       </BrowserRouter>
     </AuthProvider>
   );

@@ -19,7 +19,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-screen flex items-center justify-center bg-sky-500">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Crear cuenta
@@ -41,7 +41,7 @@ export default function Register() {
             type="password"
             required
           />
-          <button className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition">
+          <button className="w-full py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 transition">
             Registrar
           </button>
         </form>

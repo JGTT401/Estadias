@@ -1,14 +1,10 @@
-// src/components/QRGenerator.jsx
-import React from "react";
-import { QRCodeCanvas } from "qrcode.react"; // <- export nombrado
+// Antes (provoca error si no hay default export)
+// import QRCode from 'qrcode.react';
 
-export default function QRGenerator({ promotion }) {
-  const payload = JSON.stringify({ code: promotion.code, id: promotion.id });
-  return (
-    <div>
-      <h4>{promotion.title}</h4>
-      <QRCodeCanvas value={payload} size={160} />
-      <p>{promotion.description}</p>
-    </div>
-  );
+// Ahora (export nombrado en v4+)
+import { QRCodeCanvas } from "qrcode.react";
+
+export default function QRGenerator({ visitPoint }) {
+  const payload = JSON.stringify({ visit_point_id: visitPoint.id });
+  return <QRCodeCanvas value={payload} size={120} />;
 }

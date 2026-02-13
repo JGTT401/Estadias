@@ -1,9 +1,9 @@
-@import "tailwindcss";
+@layer base, components, utilities;
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/theme.css" layer(components);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
 
 body {
-  @apply bg-bg text-gray-900 antialiased;
+  background: #2898bd;
 }

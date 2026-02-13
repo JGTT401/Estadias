@@ -5,107 +5,175 @@ import QRGenerator from "./QRGenerator";
 
 export default function AdminPanel() {
   const { profile } = useContext(AuthContext);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [code, setCode] = useState("");
-  const [promotions, setPromotions] = useState([]);
-  const [message, setMessage] = useState("");
+  const [msgTitle, setMsgTitle] = useState("");
+  const [msgBody, setMsgBody] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [vpTitle, setVpTitle] = useState("");
+  const [vpDesc, setVpDesc] = useState("");
+  const [rewardText, setRewardText] = useState("");
+  const [rewardCode, setRewardCode] = useState("");
+  const [rewardQty, setRewardQty] = useState(0);
+  const [visitPoints, setVisitPoints] = useState([]);
 
   useEffect(() => {
-    fetchPromotions();
+    fetchMessages();
+    fetchVisitPoints();
   }, []);
 
-  async function fetchPromotions() {
+  async function fetchMessages() {
     const { data } = await supabase
-      .from("promotions")
+      .from("messages")
       .select("*")
       .order("created_at", { ascending: false });
-    setPromotions(data || []);
+    setMessages(data || []);
   }
 
-  async function createPromotion(e) {
+  async function createMessage(e) {
     e.preventDefault();
-    const { data, error } = await supabase
-      .from("promotions")
-      .insert([
-        {
-          title,
-          description,
-          code,
-          created_by: profile.id,
-        },
-      ])
-      .select()
-      .single();
-    if (error) return alert(error.message);
-    setTitle("");
-    setDescription("");
-    setCode("");
-    fetchPromotions();
-  }
-
-  async function sendMessageToAll(e) {
-    e.preventDefault();
-    // Insertar mensaje
+    if (!msgTitle || !msgBody) return alert("Título y cuerpo son obligatorios");
     await supabase
       .from("messages")
-      .insert([{ title: "Promoción", body: message, created_by: profile.id }]);
-    setMessage("");
-    alert("Mensaje enviado (guardado en tabla messages).");
-    // Para notificaciones reales, integrar Realtime o push notifications
+      .insert([{ title: msgTitle, body: msgBody, created_by: profile.id }]);
+    setMsgTitle("");
+    setMsgBody("");
+    fetchMessages();
+  }
+
+  async function fetchVisitPoints() {
+    const { data } = await supabase
+      .from("visit_points")
+      .select("*")
+      .order("created_at", { ascending: false });
+    setVisitPoints(data || []);
+  }
+
+  async function createVisitPoint(e) {
+    e.preventDefault();
+    const payload = {
+      title: vpTitle,
+      description: vpDesc,
+      reward_text: rewardText || null,
+      reward_code: rewardCode || null,
+      reward_quantity: Number(rewardQty) || 0,
+      created_by: profile.id,
+    };
+    const { error } = await supabase.from("visit_points").insert([payload]);
+    if (error) return alert(error.message);
+    setVpTitle("");
+    setVpDesc("");
+    setRewardText("");
+    setRewardCode("");
+    setRewardQty(0);
+    fetchVisitPoints();
   }
 
   return (
-    <div>
-      <h2>Admin Panel</h2>
-
-      <section>
-        <h3>Crear promoción</h3>
-        <form onSubmit={createPromotion}>
-          <input
-            placeholder="Título"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <input
-            placeholder="Código (único)"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-          />
-          <textarea
-            placeholder="Descripción"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <button type="submit">Crear</button>
-        </form>
-      </section>
-
-      <section>
-        <h3>Promociones</h3>
-        {promotions.map((p) => (
-          <div
-            key={p.id}
-            style={{ border: "1px solid #ccc", margin: 8, padding: 8 }}
-          >
-            <strong>{p.title}</strong>
-            <p>{p.description}</p>
-            <QRGenerator promotion={p} />
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h3 className="text-lg font-semibold mb-3">Crear mensaje</h3>
+            <form onSubmit={createMessage} className="space-y-3">
+              <input
+                className="w-full px-3 py-2 border rounded"
+                value={msgTitle}
+                onChange={(e) => setMsgTitle(e.target.value)}
+                placeholder="Título"
+              />
+              <textarea
+                className="w-full px-3 py-2 border rounded"
+                value={msgBody}
+                onChange={(e) => setMsgBody(e.target.value)}
+                placeholder="Cuerpo"
+              />
+              <button className="px-4 py-2 bg-primary text-white rounded">
+                Enviar
+              </button>
+            </form>
           </div>
-        ))}
-      </section>
 
-      <section>
-        <h3>Enviar mensaje a usuarios</h3>
-        <form onSubmit={sendMessageToAll}>
-          <textarea
-            placeholder="Mensaje"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          <button type="submit">Enviar</button>
-        </form>
-      </section>
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h3 className="text-lg font-semibold mb-3">Mensajes recientes</h3>
+            <div className="space-y-4">
+              {messages.map((m) => (
+                <div key={m.id} className="p-4 border rounded">
+                  <div className="font-medium">{m.title}</div>
+                  <div className="text-sm text-gray-600">{m.body}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <aside className="space-y-6">
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h3 className="text-lg font-semibold mb-3">
+              Crear punto de visita
+            </h3>
+            <form onSubmit={createVisitPoint} className="space-y-3">
+              <input
+                className="w-full px-3 py-2 border rounded"
+                value={vpTitle}
+                onChange={(e) => setVpTitle(e.target.value)}
+                placeholder="Título del punto"
+              />
+              <input
+                className="w-full px-3 py-2 border rounded"
+                value={vpDesc}
+                onChange={(e) => setVpDesc(e.target.value)}
+                placeholder="Descripción (opcional)"
+              />
+              <input
+                className="w-full px-3 py-2 border rounded"
+                value={rewardText}
+                onChange={(e) => setRewardText(e.target.value)}
+                placeholder="Texto recompensa (opcional)"
+              />
+              <input
+                className="w-full px-3 py-2 border rounded"
+                value={rewardCode}
+                onChange={(e) => setRewardCode(e.target.value)}
+                placeholder="Código recompensa (opcional)"
+              />
+              <input
+                className="w-full px-3 py-2 border rounded"
+                type="number"
+                value={rewardQty}
+                onChange={(e) => setRewardQty(e.target.value)}
+                placeholder="Cantidad (0 = ilimitado)"
+              />
+              <button className="px-4 py-2 bg-primary text-white rounded">
+                Crear punto
+              </button>
+            </form>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h3 className="text-lg font-semibold mb-3">Puntos</h3>
+            <div className="space-y-3">
+              {visitPoints.map((vp) => (
+                <div
+                  key={vp.id}
+                  className="p-3 border rounded flex items-center justify-between"
+                >
+                  <div>
+                    <div className="font-medium">{vp.title}</div>
+                    <div className="text-sm text-gray-500">
+                      {vp.description}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {vp.reward_text
+                        ? `Recompensa: ${vp.reward_text}`
+                        : "Sin recompensa"}
+                    </div>
+                  </div>
+                  <QRGenerator visitPoint={vp} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

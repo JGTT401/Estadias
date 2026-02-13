@@ -8,23 +8,24 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const session = supabase.auth.getSession().then((res) => {
+    supabase.auth.getSession().then((res) => {
       setUser(res?.data?.session?.user ?? null);
     });
-
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
       },
     );
-
-    return () => {
-      listener?.subscription?.unsubscribe?.();
-    };
+    return () => listener?.subscription?.unsubscribe?.();
   }, []);
 
+  async function signOut() {
+    await supabase.auth.signOut();
+    setUser(null);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, setUser, signOut }}>
       {children}
     </AuthContext.Provider>
   );

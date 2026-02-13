@@ -1,19 +1,25 @@
 // src/components/LogoutButton.jsx
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "./AuthProvider";
+import { AuthContext } from "./AuthProvider";
 
 export default function LogoutButton() {
-  const { signOut } = useAuth();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setUser } = useContext(AuthContext); // opcional: limpiar contexto
 
   async function handleLogout() {
     setLoading(true);
     try {
-      await signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      // limpiar estado local/contexto si aplica
+      if (setUser) setUser(null);
+      // redirigir al login
       navigate("/login", { replace: true });
     } catch (err) {
+      console.error("Logout error", err);
       alert("No se pudo cerrar sesión. Intenta de nuevo.");
     } finally {
       setLoading(false);
