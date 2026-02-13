@@ -1,40 +1,45 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Html5QrcodeScanner } from "html5-qrcode"; // alternativa: react-qr-reader
+import { Html5Qrcode } from "html5-qrcode";
 
 export default function QRScanner() {
   const navigate = useNavigate();
+  const refId = "reader";
 
   React.useEffect(() => {
-    const scanner = new Html5QrcodeScanner(
-      "reader",
-      { fps: 10, qrbox: 250 },
-      false,
-    );
+    const html5QrCode = new Html5Qrcode(refId);
+    const config = { fps: 10, qrbox: 250 };
 
-    scanner.render(onScanSuccess, onScanError);
-
-    function onScanSuccess(decodedText, decodedResult) {
-      try {
-        const payload = JSON.parse(decodedText);
-        // Redirigir a la página de promoción con query params
-        navigate(
-          `/promotion/${payload.id}?code=${encodeURIComponent(payload.code)}`,
-        );
-        scanner.clear();
-      } catch (err) {
-        console.error("QR no válido", err);
-      }
-    }
-
-    function onScanError(err) {
-      // console.log(err);
-    }
+    html5QrCode
+      .start(
+        { facingMode: "environment" },
+        config,
+        (decodedText) => {
+          try {
+            const payload = JSON.parse(decodedText);
+            if (payload.visit_point_id) {
+              navigate(`/visit/${payload.visit_point_id}`);
+              html5QrCode.stop().catch(() => {});
+            }
+          } catch (err) {
+            console.error("QR no válido", err);
+          }
+        },
+        (errorMessage) => {},
+      )
+      .catch((err) => console.error("No se pudo iniciar cámara", err));
 
     return () => {
-      scanner.clear().catch(() => {});
+      html5QrCode.stop().catch(() => {});
     };
   }, []);
 
-  return <div id="reader" style={{ width: "100%" }} />;
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="bg-white rounded-2xl shadow p-6 max-w-md w-full">
+        <h3 className="text-lg font-semibold mb-3">Escanear QR</h3>
+        <div id={refId} style={{ width: "100%" }} />
+      </div>
+    </div>
+  );
 }
