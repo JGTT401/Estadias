@@ -1,50 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { useAuth } from "./AuthProvider";
 
 export default function MessagesList() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchMessages();
-    const subscription = supabase
-      .channel("public:messages")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
-        (payload) => {
-          setMessages((prev) => [payload.new, ...prev]);
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(subscription);
-    };
-  }, []);
+    if (!user) return;
+    async function load() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("recipient_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) console.error(error);
+      else setMessages(data || []);
+      setLoading(false);
+    }
+    load();
+  }, [user]);
 
-  async function fetchMessages() {
-    const { data } = await supabase
-      .from("messages")
-      .select("*")
-      .order("created_at", { ascending: false });
-    setMessages(data || []);
-  }
+  if (loading) return <div className="p-6">Cargando mensajes...</div>;
+  if (!messages.length) return <div className="p-6">No tienes mensajes.</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="bg-white rounded-2xl shadow p-6">
-        <h3 className="text-xl font-semibold mb-4">Mensajes</h3>
-        <div className="space-y-4">
-          {messages.map((m) => (
-            <article key={m.id} className="p-4 border rounded">
-              <h4 className="font-medium">{m.title}</h4>
-              <p className="text-gray-600">{m.body}</p>
-              <time className="text-xs text-gray-400">
-                {new Date(m.created_at).toLocaleString()}
-              </time>
-            </article>
-          ))}
-        </div>
-      </div>
+    <div className="p-6">
+      <h2 className="text-xl font-semibold mb-4">Mensajes</h2>
+      <ul className="space-y-3">
+        {messages.map((m) => (
+          <li key={m.id} className="border rounded p-3 bg-white">
+            <div className="text-sm text-gray-500">
+              {new Date(m.created_at).toLocaleString()}
+            </div>
+            <div className="mt-1">{m.content}</div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

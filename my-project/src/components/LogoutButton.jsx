@@ -1,4 +1,3 @@
-// src/components/LogoutButton.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
@@ -13,8 +12,8 @@ export default function LogoutButton() {
     try {
       await signOut();
       navigate("/login", { replace: true });
-    } catch (err) {
-      alert("No se pudo cerrar sesión. Intenta de nuevo.");
+    } catch {
+      alert("No se pudo cerrar sesión.");
     } finally {
       setLoading(false);
     }
@@ -24,30 +23,8 @@ export default function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={loading}
-      className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium
-                 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50
-                 disabled:opacity-60 disabled:cursor-not-allowed transition"
-      aria-label="Cerrar sesión"
+      className="px-3 py-2 rounded bg-white border text-sm"
     >
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M17 16l4-4m0 0l-4-4m4 4H7"
-        />
-        <path
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M7 8v8"
-        />
-      </svg>
       {loading ? "Cerrando..." : "Cerrar sesión"}
     </button>
   );
