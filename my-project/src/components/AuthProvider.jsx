@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 const AuthContext = createContext();
@@ -9,20 +9,17 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let mounted = true;
+
     async function init() {
-      console.log("[Auth] init: obteniendo sesión...");
       try {
-        const { data, error } = await supabase.auth.getSession();
-        console.log("[Auth] getSession data:", data, "error:", error);
+        const { data } = await supabase.auth.getSession();
         const sessionUser = data?.session?.user ?? null;
-        console.log("[Auth] sessionUser:", sessionUser);
         if (sessionUser) {
-          const { data: profile, error: pErr } = await supabase
+          const { data: profile } = await supabase
             .from("profiles")
-            .select("role, created_at")
+            .select("role")
             .eq("id", sessionUser.id)
             .single();
-          console.log("[Auth] profile:", profile, "pErr:", pErr);
           if (mounted)
             setUser({ ...sessionUser, role: profile?.role ?? "user" });
         } else {
@@ -33,30 +30,31 @@ export function AuthProvider({ children }) {
         if (mounted) setUser(null);
       } finally {
         if (mounted) setLoading(false);
-        console.log("[Auth] init finished, loading=false");
       }
     }
+
     init();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        console.log("[Auth] onAuthStateChange", _event, session);
-        const sessionUser = session?.user ?? null;
-        if (sessionUser) {
+      (event, session) => {
+        console.log("[Auth] onAuthStateChange", event, session);
+        if (event === "SIGNED_OUT") {
+          setUser(null);
+          return; // no queries si no hay sesión
+        }
+        if (session?.user) {
           supabase
             .from("profiles")
             .select("role")
-            .eq("id", sessionUser.id)
+            .eq("id", session.user.id)
             .single()
-            .then(({ data: profile, error }) => {
-              console.log("[Auth] listener profile:", profile, "err:", error);
-              setUser({ ...sessionUser, role: profile?.role ?? "user" });
+            .then(({ data: profile }) => {
+              setUser({ ...session.user, role: profile?.role ?? "user" });
             })
-            .catch((e) =>
-              console.error("[Auth] listener fetch profile error:", e),
-            );
-        } else {
-          setUser(null);
+            .catch((err) => {
+              console.error("[Auth] listener fetch profile error:", err);
+              setUser({ ...session.user, role: "user" });
+            });
         }
       },
     );
@@ -67,21 +65,13 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  async function signOut() {
-    try {
-      await supabase.auth.signOut();
-    } catch (err) {
-      console.error("Error cerrando sesión:", err);
-    } finally {
-      setUser(null);
-    }
-  }
-
   return (
-    <AuthContext.Provider value={{ user, setUser, signOut, loading }}>
+    <AuthContext.Provider value={{ user, loading }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext);
+}

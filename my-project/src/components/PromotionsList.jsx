@@ -1,38 +1,68 @@
+// src/components/PromotionsList.jsx
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "./AuthProvider";
 
 export default function PromotionsList() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (authLoading) return;
+    if (!user) {
+      setPromos([]);
+      setLoading(false);
+      return;
+    }
+
+    let mounted = true;
     async function load() {
       setLoading(true);
-      // ejemplo: promociones desbloqueadas por reward_claims o por visits
-      const { data, error } = await supabase
-        .from("promotions")
-        .select("*, reward_claims(id, user_id)")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
+      try {
+        // 1) traer promociones activas
+        const { data: promotions, error: pErr } = await supabase
+          .from("promotions")
+          .select("*")
+          .eq("is_active", true)
+          .order("created_at", { ascending: false });
 
-      if (error) console.error(error);
-      else {
-        // filtrar por desbloqueadas: si reward_claims contiene user_id igual al user.id
-        const unlocked = (data || []).filter((p) => {
-          const claims = p.reward_claims || [];
-          return claims.some((c) => c.user_id === user.id);
-        });
-        setPromos(unlocked);
+        if (pErr) throw pErr;
+
+        // 2) traer claims del usuario (solo los promotion_id)
+        const { data: claims, error: cErr } = await supabase
+          .from("reward_claims")
+          .select("id, promotion_id, user_id")
+          .eq("user_id", user.id);
+
+        if (cErr) throw cErr;
+
+        const claimedPromotionIds = new Set(
+          (claims || []).map((c) => c.promotion_id),
+        );
+
+        // 3) filtrar promociones desbloqueadas por el usuario
+        const unlocked = (promotions || []).filter((p) =>
+          claimedPromotionIds.has(p.id),
+        );
+
+        if (mounted) setPromos(unlocked);
+      } catch (err) {
+        console.error("Error cargando promociones:", err);
+        if (mounted) setPromos([]);
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setLoading(false);
     }
-    load();
-  }, [user]);
 
-  if (loading) return <div className="p-6">Cargando promociones...</div>;
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [user, authLoading]);
+
+  if (authLoading || loading)
+    return <div className="p-6">Cargando promociones...</div>;
   if (!promos.length)
     return <div className="p-6">No tienes promociones desbloqueadas.</div>;
 

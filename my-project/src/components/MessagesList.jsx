@@ -2,40 +2,77 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "./AuthProvider";
 
-export default function MessagesList() {
-  const { user } = useAuth();
-  const [messages, setMessages] = useState([]);
+export default function PromotionsList() {
+  const { user, loading: authLoading } = useAuth();
+  const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (authLoading) return;
+    if (!user) {
+      setPromos([]);
+      setLoading(false);
+      return;
+    }
+
+    let mounted = true;
     async function load() {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("recipient_id", user.id)
-        .order("created_at", { ascending: false });
-      if (error) console.error(error);
-      else setMessages(data || []);
-      setLoading(false);
-    }
-    load();
-  }, [user]);
+      try {
+        const { data: promotions, error: pErr } = await supabase
+          .from("promotions")
+          .select("*")
+          .eq("is_active", true)
+          .order("created_at", { ascending: false });
 
-  if (loading) return <div className="p-6">Cargando mensajes...</div>;
-  if (!messages.length) return <div className="p-6">No tienes mensajes.</div>;
+        if (pErr) throw pErr;
+
+        const { data: claims, error: cErr } = await supabase
+          .from("reward_claims")
+          .select("promotion_id, user_id")
+          .eq("user_id", user.id);
+
+        if (cErr) throw cErr;
+
+        const claimedPromotionIds = new Set(
+          (claims || []).map((c) => c.promotion_id),
+        );
+        const unlocked = (promotions || []).filter((p) =>
+          claimedPromotionIds.has(p.id),
+        );
+
+        if (mounted) setPromos(unlocked);
+      } catch (err) {
+        console.error("Error cargando promociones:", err);
+        if (mounted) setPromos([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [user, authLoading]);
+
+  if (authLoading || loading)
+    return <div className="p-6">Cargando promociones...</div>;
+  if (!promos.length)
+    return <div className="p-6">No tienes promociones desbloqueadas.</div>;
 
   return (
     <div className="p-6">
-      <h2 className="text-xl font-semibold mb-4">Mensajes</h2>
-      <ul className="space-y-3">
-        {messages.map((m) => (
-          <li key={m.id} className="border rounded p-3 bg-white">
-            <div className="text-sm text-gray-500">
-              {new Date(m.created_at).toLocaleString()}
+      <h2 className="text-xl font-semibold mb-4">Promociones desbloqueadas</h2>
+      <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {promos.map((p) => (
+          <li key={p.id} className="border rounded p-4 bg-white">
+            <h3 className="font-semibold">{p.title}</h3>
+            <p className="text-sm text-gray-600 mt-1">{p.description}</p>
+            <div className="mt-3 text-sm text-primary">
+              Válida hasta:{" "}
+              {p.expires_at ? new Date(p.expires_at).toLocaleDateString() : "—"}
             </div>
-            <div className="mt-1">{m.content}</div>
           </li>
         ))}
       </ul>
