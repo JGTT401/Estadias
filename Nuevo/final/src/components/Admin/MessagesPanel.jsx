@@ -7,6 +7,7 @@ export default function MessagesPanel({ adminId }) {
 
   async function sendMessage() {
     if (!title || !body) return alert("Completa título y mensaje");
+    if (!adminId) return alert("Error de sesión: no se pudo identificar al administrador.");
     const { error } = await supabase
       .from("messages")
       .insert({ admin_id: adminId, title, body });

@@ -8,7 +8,6 @@ function PromotionsPanel() {
   const [minVisits, setMinVisits] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  // Cargar todas las promociones
   const fetchPromotions = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -25,7 +24,20 @@ function PromotionsPanel() {
   };
 
   useEffect(() => {
-    fetchPromotions();
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("promotions")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (!cancelled) {
+        if (error) console.error("Error cargando promociones:", error.message);
+        else setPromotions(data ?? []);
+        setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   // Crear nueva promoción

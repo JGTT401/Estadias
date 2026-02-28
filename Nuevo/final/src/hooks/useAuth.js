@@ -7,9 +7,8 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const session = supabase.auth.getSession().then((res) => {
+    supabase.auth.getSession().then((res) => {
       setUser(res.data.session?.user ?? null);
-      setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(
@@ -23,17 +22,22 @@ export function useAuth() {
 
   useEffect(() => {
     if (!user) {
-      setProfile(null);
+      queueMicrotask(() => {
+        setProfile(null);
+        setLoading(false);
+      });
       return;
     }
-    (async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-      if (!error) setProfile(data);
-    })();
+    queueMicrotask(() => setLoading(true));
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single()
+      .then(({ data, error }) => {
+        setProfile(error ? null : data);
+        setLoading(false);
+      });
   }, [user]);
 
   return { user, profile, loading };

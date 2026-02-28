@@ -36,8 +36,14 @@ export default function App() {
           )
         }
       />{" "}
-      <Route path="/login" element={<Login />} />{" "}
-      <Route path="/signup" element={<Signup />} />{" "}
+      <Route
+        path="/login"
+        element={user && profile ? <Navigate to="/" replace /> : <Login />}
+      />{" "}
+      <Route
+        path="/signup"
+        element={user && profile ? <Navigate to="/" replace /> : <Signup />}
+      />{" "}
       <Route
         path="/admin"
         element={
@@ -50,7 +56,7 @@ export default function App() {
       >
         {" "}
         <Route index element={<Navigate to="home" replace />} />{" "}
-        <Route path="home" element={<AdminHome profile={profile} />} />{" "}
+        <Route path="home" element={<AdminHome />} />{" "}
         <Route
           path="messages"
           element={<MessagesPanel adminId={profile?.id} />}

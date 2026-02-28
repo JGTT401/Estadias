@@ -3,17 +3,18 @@ import { supabase } from "../../services/supabaseClient";
 
 export default function MessagesList() {
   const [messages, setMessages] = useState([]);
-  useEffect(() => {
-    fetch();
-  }, []);
 
-  async function fetch() {
-    const { data } = await supabase
-      .from("messages")
-      .select("*")
-      .order("created_at", { ascending: false });
-    setMessages(data || []);
-  }
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("messages")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (!cancelled) setMessages(data ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div>

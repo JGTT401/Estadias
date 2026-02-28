@@ -14,13 +14,10 @@ export default function Login() {
     setLoading(true);
 
     try {
-      console.log("Enviando login", { email });
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-
-      console.log("Respuesta login", { data, error });
 
       if (error) {
         alert(error.message);
@@ -30,11 +27,7 @@ export default function Login() {
 
       // opcional: esperar a que data.user exista
       if (data?.user) {
-        // redirigir solo cuando el login fue confirmado
         nav("/");
-      } else {
-        // caso raro: sin error pero sin user
-        console.warn("Login sin user en data:", data);
       }
     } catch (err) {
       console.error("Error inesperado en login:", err);

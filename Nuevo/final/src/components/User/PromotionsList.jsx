@@ -5,25 +5,30 @@ export default function PromotionsList({ userId }) {
   const [promos, setPromos] = useState([]);
 
   useEffect(() => {
-    fetch();
-  }, []);
-
-  async function fetch() {
-    const { data: ups } = await supabase
-      .from("user_promotions")
-      .select("promotion_id")
-      .eq("user_id", userId);
-    const awardedIds = (ups || []).map((u) => u.promotion_id);
-    if (awardedIds.length === 0) {
-      setPromos([]);
+    if (!userId) {
+      queueMicrotask(() => setPromos([]));
       return;
     }
-    const { data } = await supabase
-      .from("promotions")
-      .select("*")
-      .in("id", awardedIds);
-    setPromos(data || []);
-  }
+    let cancelled = false;
+    (async () => {
+      const { data: ups } = await supabase
+        .from("user_promotions")
+        .select("promotion_id")
+        .eq("user_id", userId);
+      if (cancelled) return;
+      const awardedIds = (ups ?? []).map((u) => u.promotion_id);
+      if (awardedIds.length === 0) {
+        setPromos([]);
+        return;
+      }
+      const { data } = await supabase
+        .from("promotions")
+        .select("*")
+        .in("id", awardedIds);
+      if (!cancelled) setPromos(data ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
 
   return (
     <div>

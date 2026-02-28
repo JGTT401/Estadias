@@ -12,7 +12,7 @@ export default function MyQR({ profile }) {
         <QRCode value={profile.qr_code} size={200} />
       </div>
       <div className="mt-2 text-sm">
-        Visitas: <b>{profile.visits}</b>
+        Visitas: <b>{profile.visits ?? 0}</b>
       </div>
     </div>
   );
