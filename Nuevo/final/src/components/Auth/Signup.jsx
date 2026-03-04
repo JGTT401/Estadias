@@ -44,10 +44,12 @@ export default function Signup() {
       if (profileError) {
         console.error("Error al crear perfil:", profileError);
         setError(
-          "Cuenta creada pero hubo un error al completar el perfil. Contacta soporte."
+          "Cuenta creada pero hubo un error al completar el perfil. Contacta soporte.",
         );
       } else {
-        alert("Cuenta creada correctamente. Revisa tu correo si tienes confirmación activada.");
+        alert(
+          "Cuenta creada correctamente. Revisa tu correo si tienes confirmación activada.",
+        );
         nav("/login");
       }
     } catch (err) {
