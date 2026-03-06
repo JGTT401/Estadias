@@ -36,16 +36,16 @@ export default function UserHome({ profile }) {
   }, [profile?.id]);
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-neutral-900 tracking-tight">Bienvenido</h2>
-      <p className="text-neutral-500 text-sm mt-1 mb-6">Tu resumen rápido.</p>
+    <div className="max-w-full overflow-hidden">
+      <h2 className="text-lg sm:text-xl font-semibold text-neutral-900 tracking-tight">Bienvenido</h2>
+      <p className="text-neutral-500 text-sm mt-1 mb-4 sm:mb-6">Tu resumen rápido.</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="card-neutral p-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="card-neutral p-4 sm:p-5">
           <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Visitas acumuladas</p>
           <p className="mt-2 text-2xl font-bold text-neutral-900 tabular-nums">{visits ?? profile?.visits ?? 0}</p>
         </div>
-        <div className="card-neutral p-5 bg-neutral-50 border-neutral-200">
+        <div className="card-neutral p-4 sm:p-5 bg-neutral-50 border-neutral-200">
           <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Promociones ganadas</p>
           <p className="mt-2 text-2xl font-bold text-neutral-900 tabular-nums">{promoCount !== null ? promoCount : "—"}</p>
         </div>

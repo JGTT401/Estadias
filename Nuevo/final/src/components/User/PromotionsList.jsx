@@ -31,9 +31,9 @@ export default function PromotionsList({ userId }) {
   }, [userId]);
 
   return (
-    <div>
-      <h3 className="text-lg font-semibold text-neutral-900 mb-1">Promociones ganadas</h3>
-      <p className="text-neutral-500 text-sm mb-4">Tus promociones por visitas acumuladas.</p>
+    <div className="max-w-full overflow-hidden">
+      <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-1">Promociones ganadas</h3>
+      <p className="text-neutral-500 text-sm mb-3 sm:mb-4">Tus promociones por visitas acumuladas.</p>
       {promos.length === 0 ? (
         <p className="text-neutral-500 py-8 text-center">Aún no tienes promociones. Sigue acumulando visitas.</p>
       ) : (

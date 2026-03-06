@@ -5,20 +5,27 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 
 @layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
   body {
     @apply antialiased text-neutral-800 bg-neutral-100 min-h-screen;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
 
 @layer components {
   .input-neutral {
-    @apply w-full px-4 py-2.5 rounded-lg border border-neutral-200 bg-white text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 transition-shadow;
+    @apply w-full px-4 py-2.5 rounded-lg border border-neutral-200 bg-white text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 transition-shadow min-h-[2.75rem];
   }
   .btn-neutral {
-    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-neutral-800 text-white hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-neutral-800 text-white hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[2.75rem];
   }
   .btn-neutral-outline {
-    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300 transition-colors;
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300 transition-colors min-h-[2.75rem];
   }
   .card-neutral {
     @apply bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden;

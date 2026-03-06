@@ -17,9 +17,9 @@ export default function MessagesList() {
   }, []);
 
   return (
-    <div>
-      <h3 className="text-lg font-semibold text-neutral-900 mb-1">Mensajes</h3>
-      <p className="text-neutral-500 text-sm mb-4">Comunicados del equipo.</p>
+    <div className="max-w-full overflow-hidden">
+      <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-1">Mensajes</h3>
+      <p className="text-neutral-500 text-sm mb-3 sm:mb-4">Comunicados del equipo.</p>
       {messages.length === 0 ? (
         <p className="text-neutral-500 py-8 text-center">No hay mensajes aún.</p>
       ) : (

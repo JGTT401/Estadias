@@ -38,8 +38,8 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-100 flex flex-col justify-center px-4 py-12">
-      <div className="max-w-md mx-auto w-full bg-white rounded-2xl border border-neutral-200 shadow-sm p-8">
+    <div className="min-h-screen bg-neutral-100 flex flex-col justify-center px-3 py-6 sm:px-4 sm:py-12">
+      <div className="max-w-md mx-auto w-full bg-white rounded-2xl border border-neutral-200 shadow-sm p-4 sm:p-6 lg:p-8">
         <h1 className="text-xl font-semibold text-neutral-900 tracking-tight">
           Iniciar sesión
         </h1>

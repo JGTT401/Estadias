@@ -99,11 +99,11 @@ function PromotionsPanel() {
   }
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-neutral-900 tracking-tight mb-1">Panel de promociones</h2>
-      <p className="text-neutral-500 text-sm mb-6">Crea y gestiona promociones por visitas.</p>
+    <div className="max-w-full overflow-hidden">
+      <h2 className="text-lg sm:text-xl font-semibold text-neutral-900 tracking-tight mb-1">Panel de promociones</h2>
+      <p className="text-neutral-500 text-sm mb-4 sm:mb-6">Crea y gestiona promociones por visitas.</p>
 
-      <form onSubmit={createPromotion} className="card-neutral p-5 mb-6 bg-neutral-50 border-neutral-200">
+      <form onSubmit={createPromotion} className="card-neutral p-4 sm:p-5 mb-4 sm:mb-6 bg-neutral-50 border-neutral-200">
         <h3 className="text-sm font-medium text-neutral-700 mb-3">Nueva promoción</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
           <div>
@@ -139,7 +139,7 @@ function PromotionsPanel() {
               required
             />
           </div>
-          <button type="submit" className="btn-neutral py-2">
+          <button type="submit" className="btn-neutral py-2 w-full sm:w-auto min-h-[2.75rem]">
             Crear promoción
           </button>
         </div>
@@ -147,7 +147,7 @@ function PromotionsPanel() {
 
       <ul className="space-y-3">
         {promotions.map((promo) => (
-          <li key={promo.id} className="card-neutral p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <li key={promo.id} className="card-neutral p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="min-w-0">
               <p className="font-medium text-neutral-900">{promo.title}</p>
               <p className="text-sm text-neutral-600 mt-0.5">{promo.description}</p>
@@ -156,18 +156,18 @@ function PromotionsPanel() {
                 {promo.active ? "Activa" : "Inactiva"}
               </span>
             </div>
-            <div className="flex gap-2 flex-shrink-0">
+            <div className="flex flex-wrap gap-2 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => togglePromotion(promo.id, promo.active)}
-                className={promo.active ? "btn-neutral-outline py-2 text-sm" : "btn-neutral py-2 text-sm"}
+                className={`${promo.active ? "btn-neutral-outline" : "btn-neutral"} py-2 text-sm min-h-[2.75rem] flex-1 sm:flex-initial min-w-[7rem]`}
               >
                 {promo.active ? "Desactivar" : "Activar"}
               </button>
               <button
                 type="button"
                 onClick={() => deletePromotion(promo.id)}
-                className="btn-neutral-outline py-2 text-sm text-neutral-600"
+                className="btn-neutral-outline py-2 text-sm text-neutral-600 min-h-[2.75rem] flex-1 sm:flex-initial min-w-[7rem]"
               >
                 Eliminar
               </button>
