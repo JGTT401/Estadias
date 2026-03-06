@@ -32,16 +32,19 @@ export default function PromotionsList({ userId }) {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-2">Promociones ganadas</h3>
+      <h3 className="text-lg font-semibold text-neutral-900 mb-1">Promociones ganadas</h3>
+      <p className="text-neutral-500 text-sm mb-4">Tus promociones por visitas acumuladas.</p>
       {promos.length === 0 ? (
-        <div>No tienes promociones aún</div>
+        <p className="text-neutral-500 py-8 text-center">Aún no tienes promociones. Sigue acumulando visitas.</p>
       ) : (
-        promos.map((p) => (
-          <div key={p.id} className="mb-2 p-2 border rounded">
-            <div className="font-semibold">{p.title}</div>
-            <div className="text-sm">{p.description}</div>
-          </div>
-        ))
+        <ul className="space-y-3">
+          {promos.map((p) => (
+            <li key={p.id} className="card-neutral p-4 bg-neutral-50 border-neutral-200">
+              <p className="font-medium text-neutral-900">{p.title}</p>
+              <p className="text-sm text-neutral-600 mt-0.5">{p.description}</p>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

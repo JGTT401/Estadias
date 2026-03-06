@@ -90,65 +90,88 @@ function PromotionsPanel() {
     }
   };
 
-  if (loading) return <p>Cargando promociones...</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <p className="text-neutral-500">Cargando promociones...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h2>Panel de Promociones</h2>
+      <h2 className="text-xl font-semibold text-neutral-900 tracking-tight mb-1">Panel de promociones</h2>
+      <p className="text-neutral-500 text-sm mb-6">Crea y gestiona promociones por visitas.</p>
 
-      <form onSubmit={createPromotion} className="mb-4">
-        <input
-          type="text"
-          placeholder="Título"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          className="border p-2 mr-2"
-        />
-        <input
-          type="text"
-          placeholder="Descripción"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          className="border p-2 mr-2"
-        />
-        <input
-          type="number"
-          placeholder="Visitas mínimas"
-          value={minVisits}
-          onChange={(e) => setMinVisits(Number(e.target.value))}
-          required
-          className="border p-2 mr-2"
-        />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2">
-          Crear
-        </button>
+      <form onSubmit={createPromotion} className="card-neutral p-5 mb-6 bg-neutral-50 border-neutral-200">
+        <h3 className="text-sm font-medium text-neutral-700 mb-3">Nueva promoción</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+          <div>
+            <label className="block text-xs font-medium text-neutral-500 mb-1">Título</label>
+            <input
+              type="text"
+              className="input-neutral py-2"
+              placeholder="Ej. 5 visitas"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-500 mb-1">Descripción</label>
+            <input
+              type="text"
+              className="input-neutral py-2"
+              placeholder="Detalle de la promoción"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-neutral-500 mb-1">Visitas mínimas</label>
+            <input
+              type="number"
+              min={1}
+              className="input-neutral py-2"
+              value={minVisits}
+              onChange={(e) => setMinVisits(Number(e.target.value))}
+              required
+            />
+          </div>
+          <button type="submit" className="btn-neutral py-2">
+            Crear promoción
+          </button>
+        </div>
       </form>
 
-      <ul>
+      <ul className="space-y-3">
         {promotions.map((promo) => (
-          <li key={promo.id} className="border p-2 mb-2">
-            <strong>{promo.title}</strong> - {promo.description}
-            <br />
-            <em>Visitas mínimas: {promo.min_visits}</em>
-            <br />
-            Estado: {promo.active ? "Activa ✅" : "Inactiva ❌"}
-            <br />
-            <button
-              onClick={() => togglePromotion(promo.id, promo.active)}
-              className={`px-3 py-1 mt-2 ${
-                promo.active ? "bg-red-500" : "bg-green-500"
-              } text-white mr-2`}
-            >
-              {promo.active ? "Desactivar" : "Activar"}
-            </button>
-            <button
-              onClick={() => deletePromotion(promo.id)}
-              className="px-3 py-1 mt-2 bg-gray-700 text-white"
-            >
-              Eliminar
-            </button>
+          <li key={promo.id} className="card-neutral p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-medium text-neutral-900">{promo.title}</p>
+              <p className="text-sm text-neutral-600 mt-0.5">{promo.description}</p>
+              <p className="text-xs text-neutral-500 mt-1">Mín. {promo.min_visits} visitas</p>
+              <span className={`inline-block mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${promo.active ? "bg-neutral-200 text-neutral-700" : "bg-neutral-100 text-neutral-500"}`}>
+                {promo.active ? "Activa" : "Inactiva"}
+              </span>
+            </div>
+            <div className="flex gap-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => togglePromotion(promo.id, promo.active)}
+                className={promo.active ? "btn-neutral-outline py-2 text-sm" : "btn-neutral py-2 text-sm"}
+              >
+                {promo.active ? "Desactivar" : "Activar"}
+              </button>
+              <button
+                type="button"
+                onClick={() => deletePromotion(promo.id)}
+                className="btn-neutral-outline py-2 text-sm text-neutral-600"
+              >
+                Eliminar
+              </button>
+            </div>
           </li>
         ))}
       </ul>

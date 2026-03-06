@@ -19,24 +19,25 @@ export default function AdminLayout({ profile }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-100">
       <Navbar items={items} />
-      <header className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-        <div>
-          Hola, <b>{profile.email}</b>
-        </div>
-        <div>
+      <header className="bg-white border-b border-neutral-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+          <p className="text-sm text-neutral-600">
+            Hola, <span className="font-medium text-neutral-900">{profile.email}</span>
+          </p>
           <button
-            className="bg-red-500 text-white px-3 py-1 rounded"
+            type="button"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-400"
             onClick={handleLogout}
           >
-            Salir
+            Cerrar sesión
           </button>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 pb-8">
-        <div className="bg-white rounded shadow p-4">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div className="card-neutral p-6">
           <Outlet />
         </div>
       </main>

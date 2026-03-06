@@ -32,30 +32,22 @@ export default function AdminHome() {
   }, []);
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-2">Bienvenido, Admin</h2>
-      <p className="text-gray-600 mb-4">
-        Panel de control rápido y estadísticas.
-      </p>
+    <div>
+      <h2 className="text-xl font-semibold text-neutral-900 tracking-tight">Panel de control</h2>
+      <p className="text-neutral-500 text-sm mt-1 mb-6">Resumen y estadísticas</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-white rounded shadow">
-          <div className="text-sm text-gray-500">Usuarios totales</div>
-          <div className="text-2xl font-semibold">
-            {stats.users !== null ? stats.users : "—"}
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="card-neutral p-5">
+          <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Usuarios totales</p>
+          <p className="mt-2 text-2xl font-bold text-neutral-900 tabular-nums">{stats.users !== null ? stats.users : "—"}</p>
         </div>
-        <div className="p-4 bg-white rounded shadow">
-          <div className="text-sm text-gray-500">Escaneos hoy</div>
-          <div className="text-2xl font-semibold">
-            {stats.scansToday !== null ? stats.scansToday : "—"}
-          </div>
+        <div className="card-neutral p-5 bg-neutral-50 border-neutral-200">
+          <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Escaneos hoy</p>
+          <p className="mt-2 text-2xl font-bold text-neutral-900 tabular-nums">{stats.scansToday !== null ? stats.scansToday : "—"}</p>
         </div>
-        <div className="p-4 bg-white rounded shadow">
-          <div className="text-sm text-gray-500">Promociones activas</div>
-          <div className="text-2xl font-semibold">
-            {stats.promotionsActive !== null ? stats.promotionsActive : "—"}
-          </div>
+        <div className="card-neutral p-5">
+          <p className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Promociones activas</p>
+          <p className="mt-2 text-2xl font-bold text-neutral-900 tabular-nums">{stats.promotionsActive !== null ? stats.promotionsActive : "—"}</p>
         </div>
       </div>
     </div>

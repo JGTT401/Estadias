@@ -98,19 +98,16 @@ export default function QRScanner({ adminId }) {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-2">Escanear QR</h3>
-      <video ref={videoRef} className="w-full h-64 bg-black mb-2" />
-      <div className="flex gap-2">
-        <button
-          className="bg-indigo-600 text-white px-3 py-1 rounded"
-          onClick={startScan}
-        >
-          Iniciar
+      <h3 className="text-lg font-semibold text-neutral-900 mb-1">Escanear código QR</h3>
+      <p className="text-neutral-500 text-sm mb-4">Apunta la cámara al código QR del usuario.</p>
+      <div className="rounded-xl overflow-hidden border border-neutral-200 bg-neutral-900 aspect-video max-h-80 mb-4">
+        <video ref={videoRef} className="w-full h-full object-cover" />
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className="btn-neutral" onClick={startScan}>
+          Iniciar cámara
         </button>
-        <button
-          className="bg-gray-400 text-white px-3 py-1 rounded"
-          onClick={stopScan}
-        >
+        <button type="button" className="btn-neutral-outline" onClick={stopScan}>
           Detener
         </button>
       </div>

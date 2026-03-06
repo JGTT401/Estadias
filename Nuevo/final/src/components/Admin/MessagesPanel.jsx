@@ -19,25 +19,34 @@ export default function MessagesPanel({ adminId }) {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-2">Enviar mensaje</h3>
-      <input
-        className="w-full p-2 border mb-2"
-        placeholder="Título"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <textarea
-        className="w-full p-2 border mb-2"
-        placeholder="Mensaje"
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-      />
-      <button
-        className="bg-blue-600 text-white px-3 py-1 rounded"
-        onClick={sendMessage}
-      >
-        Enviar
-      </button>
+      <h3 className="text-lg font-semibold text-neutral-900 mb-1">Enviar mensaje</h3>
+      <p className="text-neutral-500 text-sm mb-4">El mensaje será visible para todos los usuarios.</p>
+      <div className="space-y-4 max-w-xl">
+        <div>
+          <label htmlFor="msg-title" className="block text-sm font-medium text-neutral-700 mb-1.5">Título</label>
+          <input
+            id="msg-title"
+            className="input-neutral"
+            placeholder="Asunto del mensaje"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="msg-body" className="block text-sm font-medium text-neutral-700 mb-1.5">Mensaje</label>
+          <textarea
+            id="msg-body"
+            className="input-neutral min-h-[120px] resize-y"
+            placeholder="Escribe el contenido..."
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={4}
+          />
+        </div>
+        <button type="button" className="btn-neutral" onClick={sendMessage}>
+          Enviar a todos
+        </button>
+      </div>
     </div>
   );
 }

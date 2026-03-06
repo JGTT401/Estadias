@@ -61,48 +61,55 @@ export default function Signup() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">Registro</h2>
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">
-          {error}
-        </div>
-      )}
-      <form onSubmit={handleSignup} autoComplete="on">
-        <input
-          type="email"
-          name="email"
-          className="w-full p-2 border mb-3"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          className="w-full p-2 border mb-3"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
-          minLength={6}
-          required
-        />
-        <button
-          type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded disabled:opacity-50"
-          disabled={loading}
-        >
-          {loading ? "Creando cuenta..." : "Crear cuenta"}
-        </button>
-      </form>
-      <div className="mt-4 text-sm">
-        ¿Ya tienes cuenta?{" "}
-        <Link to="/login" className="text-blue-600">
-          Inicia sesión
-        </Link>
+    <div className="min-h-screen bg-neutral-100 flex flex-col justify-center px-4 py-12">
+      <div className="max-w-md mx-auto w-full bg-white rounded-2xl border border-neutral-200 shadow-sm p-8">
+        <h1 className="text-xl font-semibold text-neutral-900 tracking-tight">Crear cuenta</h1>
+        <p className="text-neutral-500 text-sm mt-1 mb-6">Regístrate para empezar</p>
+        {error && (
+          <div className="mb-4 p-3 bg-neutral-100 border border-neutral-200 text-neutral-700 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+        <form onSubmit={handleSignup} autoComplete="on" className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">Correo</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              className="input-neutral"
+              placeholder="tu@ejemplo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1.5">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              className="input-neutral"
+              placeholder="Mínimo 6 caracteres"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              minLength={6}
+              required
+            />
+          </div>
+          <button type="submit" className="btn-neutral w-full py-3" disabled={loading}>
+            {loading ? "Creando cuenta..." : "Crear cuenta"}
+          </button>
+        </form>
+        <p className="mt-6 text-center text-sm text-neutral-500">
+          ¿Ya tienes cuenta?{" "}
+          <Link to="/login" className="font-medium text-neutral-700 hover:text-neutral-900 underline underline-offset-2">
+            Inicia sesión
+          </Link>
+        </p>
       </div>
     </div>
   );
