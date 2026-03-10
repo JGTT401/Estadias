@@ -16,6 +16,7 @@ export default function AdminLayout({ profile }) {
     { to: "/admin/messages", label: "Mensajes" },
     { to: "/admin/promotions", label: "Promociones" },
     { to: "/admin/scan", label: "Escanear QR" },
+    { to: "/admin/scans", label: "Historial" },
   ];
 
   return (

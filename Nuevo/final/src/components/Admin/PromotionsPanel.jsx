@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
+import { useToast } from "../../context/ToastContext";
+import ConfirmModal from "../Shared/ConfirmModal";
 
 function PromotionsPanel() {
   const [promotions, setPromotions] = useState([]);
@@ -7,6 +9,13 @@ function PromotionsPanel() {
   const [description, setDescription] = useState("");
   const [minVisits, setMinVisits] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [editId, setEditId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editMinVisits, setEditMinVisits] = useState(1);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [promoToDelete, setPromoToDelete] = useState(null);
+  const toast = useToast();
 
   const fetchPromotions = async () => {
     setLoading(true);
@@ -17,8 +26,9 @@ function PromotionsPanel() {
 
     if (error) {
       console.error("Error cargando promociones:", error.message);
+      toast.error("Error al cargar promociones");
     } else {
-      setPromotions(data);
+      setPromotions(data ?? []);
     }
     setLoading(false);
   };
@@ -32,15 +42,18 @@ function PromotionsPanel() {
         .select("*")
         .order("created_at", { ascending: false });
       if (!cancelled) {
-        if (error) console.error("Error cargando promociones:", error.message);
-        else setPromotions(data ?? []);
+        if (error) {
+          console.error("Error cargando promociones:", error.message);
+          toast.error("Error al cargar promociones");
+        } else {
+          setPromotions(data ?? []);
+        }
         setLoading(false);
       }
     })();
     return () => { cancelled = true; };
   }, []);
 
-  // Crear nueva promoción
   const createPromotion = async (e) => {
     e.preventDefault();
 
@@ -53,8 +66,9 @@ function PromotionsPanel() {
 
     if (error) {
       console.error("Error creando promoción:", error.message);
+      toast.error("Error al crear promoción");
     } else {
-      alert("Promoción creada correctamente");
+      toast.success("Promoción creada correctamente");
       setTitle("");
       setDescription("");
       setMinVisits(1);
@@ -62,7 +76,6 @@ function PromotionsPanel() {
     }
   };
 
-  // Cambiar estado de una promoción
   const togglePromotion = async (id, currentState) => {
     const { error } = await supabase
       .from("promotions")
@@ -71,23 +84,65 @@ function PromotionsPanel() {
 
     if (error) {
       console.error("Error cambiando estado:", error.message);
+      toast.error("Error al cambiar estado");
     } else {
+      toast.success(currentState ? "Promoción desactivada" : "Promoción activada");
       fetchPromotions();
     }
   };
 
-  // Eliminar promoción
-  const deletePromotion = async (id) => {
-    if (!window.confirm("¿Seguro que quieres eliminar esta promoción?")) return;
+  const openEdit = (promo) => {
+    setEditId(promo.id);
+    setEditTitle(promo.title);
+    setEditDescription(promo.description ?? "");
+    setEditMinVisits(promo.min_visits ?? 1);
+  };
 
-    const { error } = await supabase.from("promotions").delete().eq("id", id);
+  const closeEdit = () => {
+    setEditId(null);
+  };
+
+  const saveEdit = async (e) => {
+    e.preventDefault();
+    if (!editId) return;
+
+    const { error } = await supabase
+      .from("promotions")
+      .update({
+        title: editTitle,
+        description: editDescription,
+        min_visits: editMinVisits,
+      })
+      .eq("id", editId);
+
+    if (error) {
+      console.error("Error editando promoción:", error.message);
+      toast.error("Error al guardar cambios");
+    } else {
+      toast.success("Promoción actualizada");
+      closeEdit();
+      fetchPromotions();
+    }
+  };
+
+  const openDeleteModal = (promo) => {
+    setPromoToDelete(promo);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!promoToDelete) return;
+
+    const { error } = await supabase.from("promotions").delete().eq("id", promoToDelete.id);
 
     if (error) {
       console.error("Error eliminando promoción:", error.message);
+      toast.error("Error al eliminar promoción");
     } else {
-      alert("Promoción eliminada");
+      toast.success("Promoción eliminada");
       fetchPromotions();
     }
+    setPromoToDelete(null);
   };
 
   if (loading) {
@@ -148,33 +203,97 @@ function PromotionsPanel() {
       <ul className="space-y-3">
         {promotions.map((promo) => (
           <li key={promo.id} className="card-neutral p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="min-w-0">
-              <p className="font-medium text-neutral-900">{promo.title}</p>
-              <p className="text-sm text-neutral-600 mt-0.5">{promo.description}</p>
-              <p className="text-xs text-neutral-500 mt-1">Mín. {promo.min_visits} visitas</p>
-              <span className={`inline-block mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${promo.active ? "bg-neutral-200 text-neutral-700" : "bg-neutral-100 text-neutral-500"}`}>
-                {promo.active ? "Activa" : "Inactiva"}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => togglePromotion(promo.id, promo.active)}
-                className={`${promo.active ? "btn-neutral-outline" : "btn-neutral"} py-2 text-sm min-h-[2.75rem] flex-1 sm:flex-initial min-w-[7rem]`}
-              >
-                {promo.active ? "Desactivar" : "Activar"}
-              </button>
-              <button
-                type="button"
-                onClick={() => deletePromotion(promo.id)}
-                className="btn-neutral-outline py-2 text-sm text-neutral-600 min-h-[2.75rem] flex-1 sm:flex-initial min-w-[7rem]"
-              >
-                Eliminar
-              </button>
-            </div>
+            {editId === promo.id ? (
+              <form onSubmit={saveEdit} className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+                <div>
+                  <label className="block text-xs font-medium text-neutral-500 mb-1">Título</label>
+                  <input
+                    type="text"
+                    className="input-neutral py-2"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-neutral-500 mb-1">Descripción</label>
+                  <input
+                    type="text"
+                    className="input-neutral py-2"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-neutral-500 mb-1">Visitas mínimas</label>
+                  <input
+                    type="number"
+                    min={1}
+                    className="input-neutral py-2"
+                    value={editMinVisits}
+                    onChange={(e) => setEditMinVisits(Number(e.target.value))}
+                    required
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button type="submit" className="btn-neutral py-2 text-sm min-h-[2.75rem]">
+                    Guardar
+                  </button>
+                  <button type="button" className="btn-neutral-outline py-2 text-sm min-h-[2.75rem]" onClick={closeEdit}>
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <div className="min-w-0">
+                  <p className="font-medium text-neutral-900">{promo.title}</p>
+                  <p className="text-sm text-neutral-600 mt-0.5">{promo.description}</p>
+                  <p className="text-xs text-neutral-500 mt-1">Mín. {promo.min_visits} visitas</p>
+                  <span className={`inline-block mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${promo.active ? "bg-neutral-200 text-neutral-700" : "bg-neutral-100 text-neutral-500"}`}>
+                    {promo.active ? "Activa" : "Inactiva"}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => togglePromotion(promo.id, promo.active)}
+                    className={`${promo.active ? "btn-neutral-outline" : "btn-neutral"} py-2 text-sm min-h-[2.75rem] flex-1 sm:flex-initial min-w-[7rem]`}
+                  >
+                    {promo.active ? "Desactivar" : "Activar"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openEdit(promo)}
+                    className="btn-neutral-outline py-2 text-sm min-h-[2.75rem] flex-1 sm:flex-initial min-w-[7rem]"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openDeleteModal(promo)}
+                    className="btn-neutral-outline py-2 text-sm text-neutral-600 min-h-[2.75rem] flex-1 sm:flex-initial min-w-[7rem]"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </>
+            )}
           </li>
         ))}
       </ul>
+
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => { setDeleteModalOpen(false); setPromoToDelete(null); }}
+        onConfirm={handleConfirmDelete}
+        title="Eliminar promoción"
+        message="¿Seguro que quieres eliminar esta promoción? Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        variant="danger"
+      />
     </div>
   );
 }

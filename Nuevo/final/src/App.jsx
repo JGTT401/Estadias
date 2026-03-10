@@ -13,6 +13,8 @@ import MessagesList from "./components/User/MessagesList";
 import PromotionsList from "./components/User/PromotionsList";
 import AdminHome from "./components/Admin/AdminHome";
 import UserHome from "./components/User/UserHome";
+import ScanHistory from "./components/Admin/ScanHistory";
+import NotFound from "./components/Shared/NotFound";
 import { useAuth } from "./hooks/useAuth";
 
 export default function App() {
@@ -70,9 +72,10 @@ export default function App() {
           path="messages"
           element={<MessagesPanel adminId={profile?.id} />}
         />{" "}
-        <Route path="promotions" element={<PromotionsPanel />} />{" "}
-        <Route path="scan" element={<QRScanner adminId={profile?.id} />} />{" "}
-      </Route>{" "}
+        <Route path="promotions" element={<PromotionsPanel />} />
+        <Route path="scan" element={<QRScanner adminId={profile?.id} />} />
+        <Route path="scans" element={<ScanHistory />} />
+      </Route>
       <Route
         path="/user"
         element={
@@ -91,8 +94,9 @@ export default function App() {
         <Route
           path="promotions"
           element={<PromotionsList userId={profile?.id} />}
-        />{" "}
-      </Route>{" "}
+        />
+      </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

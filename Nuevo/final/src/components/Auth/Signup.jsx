@@ -2,6 +2,21 @@ import React, { useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 import { v4 as uuidv4 } from "uuid";
 import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "../../context/ToastContext";
+
+function getSignupErrorMessage(error) {
+  const msg = error?.message?.toLowerCase() ?? "";
+  if (msg.includes("user already registered") || msg.includes("already been registered")) {
+    return "Ya existe una cuenta con este correo. Inicia sesión o usa otro correo.";
+  }
+  if (msg.includes("password")) {
+    return "La contraseña no cumple los requisitos. Usa al menos 6 caracteres.";
+  }
+  if (msg.includes("invalid email")) {
+    return "Introduce un correo electrónico válido.";
+  }
+  return error?.message ?? "Error al crear la cuenta. Intenta de nuevo.";
+}
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -9,19 +24,34 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const nav = useNavigate();
+  const toast = useToast();
 
   async function handleSignup(e) {
     e.preventDefault();
+    if (loading) return;
     setError("");
+
+    const emailTrim = email.trim();
+    const passwordTrim = password.trim();
+    if (!emailTrim || !passwordTrim) {
+      setError("Completa correo y contraseña para registrarte.");
+      return;
+    }
+    if (passwordTrim.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
+        email: emailTrim,
+        password: passwordTrim,
       });
       if (signUpError) {
-        setError(signUpError.message);
+        setError(getSignupErrorMessage(signUpError));
+        setLoading(false);
         return;
       }
 
@@ -29,7 +59,7 @@ export default function Signup() {
       const qr = uuidv4();
       const profileData = {
         id: userId,
-        email,
+        email: emailTrim,
         role: "user",
         qr_code: qr,
         visits: 0,
@@ -43,13 +73,9 @@ export default function Signup() {
 
       if (profileError) {
         console.error("Error al crear perfil:", profileError);
-        setError(
-          "Cuenta creada pero hubo un error al completar el perfil. Contacta soporte.",
-        );
+        setError("Cuenta creada pero hubo un error al completar el perfil. Contacta soporte.");
       } else {
-        alert(
-          "Cuenta creada correctamente. Revisa tu correo si tienes confirmación activada.",
-        );
+        toast.success("Cuenta creada correctamente. Revisa tu correo si tienes confirmación activada.");
         nav("/login");
       }
     } catch (err) {
@@ -65,12 +91,12 @@ export default function Signup() {
       <div className="max-w-md mx-auto w-full bg-white rounded-2xl border border-neutral-200 shadow-sm p-4 sm:p-6 lg:p-8">
         <h1 className="text-xl font-semibold text-neutral-900 tracking-tight">Crear cuenta</h1>
         <p className="text-neutral-500 text-sm mt-1 mb-6">Regístrate para empezar</p>
-        {error && (
-          <div className="mb-4 p-3 bg-neutral-100 border border-neutral-200 text-neutral-700 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
         <form onSubmit={handleSignup} autoComplete="on" className="space-y-4">
+          {error && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-700" role="alert">
+              {error}
+            </div>
+          )}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">Correo</label>
             <input
@@ -80,9 +106,8 @@ export default function Signup() {
               className="input-neutral"
               placeholder="tu@ejemplo.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setError(""); }}
               autoComplete="email"
-              required
             />
           </div>
           <div>
@@ -94,10 +119,9 @@ export default function Signup() {
               className="input-neutral"
               placeholder="Mínimo 6 caracteres"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); setError(""); }}
               autoComplete="new-password"
               minLength={6}
-              required
             />
           </div>
           <button type="submit" className="btn-neutral w-full py-3" disabled={loading}>

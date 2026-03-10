@@ -2,36 +2,59 @@ import React, { useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
 
+function getLoginErrorMessage(error) {
+  const msg = error?.message?.toLowerCase() ?? "";
+  if (msg.includes("invalid login credentials") || msg.includes("invalid_credentials")) {
+    return "Correo o contraseña incorrectos. Verifica tus datos e intenta de nuevo.";
+  }
+  if (msg.includes("email not confirmed")) {
+    return "Debes confirmar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.";
+  }
+  if (msg.includes("user not found")) {
+    return "No existe una cuenta con este correo.";
+  }
+  return error?.message ?? "Error al iniciar sesión. Intenta de nuevo.";
+}
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const nav = useNavigate();
 
   async function handleLogin(e) {
     e.preventDefault();
-    if (loading) return; // evita envíos dobles
+    if (loading) return;
+    setError("");
+
+    const emailTrim = email.trim();
+    const passwordTrim = password.trim();
+    if (!emailTrim || !passwordTrim) {
+      setError("Completa correo y contraseña para iniciar sesión.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: emailTrim,
+        password: passwordTrim,
       });
 
-      if (error) {
-        alert(error.message);
+      if (signInError) {
+        setError(getLoginErrorMessage(signInError));
         setLoading(false);
         return;
       }
 
-      // opcional: esperar a que data.user exista
       if (data?.user) {
         nav("/");
       }
     } catch (err) {
       console.error("Error inesperado en login:", err);
-      alert("Ocurrió un error. Revisa la consola.");
+      setError("Ocurrió un error inesperado. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -47,6 +70,11 @@ export default function Login() {
           Accede a tu cuenta
         </p>
         <form onSubmit={handleLogin} autoComplete="on" className="space-y-4">
+          {error && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-700" role="alert">
+              {error}
+            </div>
+          )}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">
               Correo
@@ -58,7 +86,7 @@ export default function Login() {
               className="input-neutral"
               placeholder="tu@ejemplo.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setError(""); }}
               autoComplete="email"
             />
           </div>
@@ -73,7 +101,7 @@ export default function Login() {
               className="input-neutral"
               placeholder="••••••••"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); setError(""); }}
               autoComplete="current-password"
             />
           </div>

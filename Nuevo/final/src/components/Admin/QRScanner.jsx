@@ -1,13 +1,21 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { supabase } from "../../services/supabaseClient";
+import { useToast } from "../../context/ToastContext";
 
 export default function QRScanner({ adminId }) {
   const videoRef = useRef(null);
   const codeReaderRef = useRef(null);
+  const [scanning, setScanning] = useState(false);
+  const [cameraError, setCameraError] = useState("");
+  const toast = useToast();
 
   async function startScan() {
+    setCameraError("");
+    if (!videoRef.current) return;
+
     try {
+      setScanning(true);
       codeReaderRef.current = new BrowserMultiFormatReader();
       await codeReaderRef.current.decodeFromVideoDevice(
         null,
@@ -15,23 +23,36 @@ export default function QRScanner({ adminId }) {
         (result) => {
           if (result) {
             handleResult(result.getText());
-            codeReaderRef.current.reset();
+            codeReaderRef.current?.reset();
           }
         },
       );
     } catch (err) {
       console.error(err);
-      alert("Error al iniciar la cámara");
+      const msg = err?.message ?? String(err);
+      if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("not allowed")) {
+        setCameraError("Permiso de cámara denegado. Activa el acceso en la configuración del navegador.");
+      } else if (msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("no camera")) {
+        setCameraError("No se encontró ninguna cámara disponible.");
+      } else {
+        setCameraError("Error al iniciar la cámara. Comprueba los permisos o usa otro dispositivo.");
+      }
+      toast.error("No se pudo iniciar la cámara");
+    } finally {
+      setScanning(false);
     }
   }
 
   async function handleResult(text) {
     if (!adminId) {
-      alert("Error de sesión: no se pudo identificar al administrador.");
+      toast.error("Error de sesión: no se pudo identificar al administrador.");
       return;
     }
     const qrCode = String(text ?? "").trim();
-    if (!qrCode) return alert("El código QR no contiene datos válidos.");
+    if (!qrCode) {
+      toast.error("El código QR no contiene datos válidos.");
+      return;
+    }
 
     const { data: user, error } = await supabase
       .from("profiles")
@@ -41,26 +62,26 @@ export default function QRScanner({ adminId }) {
 
     if (error) {
       console.error("Error al buscar usuario por QR:", error);
-      return alert("Error al buscar usuario. Revisa la consola y las políticas RLS en Supabase.");
+      toast.error("Error al buscar usuario. Intenta de nuevo.");
+      return;
     }
-    if (!user) return alert("Usuario no encontrado");
+    if (!user) {
+      toast.error("Usuario no encontrado");
+      return;
+    }
 
     const newVisits = (user.visits ?? 0) + 1;
 
     const { error: scanError } = await supabase
       .from("scans")
       .insert({ admin_id: adminId, user_id: user.id });
+
     if (scanError) {
       console.error("Error al registrar escaneo:", scanError);
-      return alert(
-        "Error al registrar escaneo. Revisa las políticas RLS en la tabla 'scans'. " +
-          scanError.message,
-      );
+      toast.error("Error al registrar escaneo. " + scanError.message);
+      return;
     }
 
-    // Las visitas se incrementan automáticamente por un trigger en la BD al insertar en scans
-
-    // Asignar promociones que el usuario recién alcanza
     const { data: activePromos } = await supabase
       .from("promotions")
       .select("id, min_visits, title")
@@ -85,27 +106,42 @@ export default function QRScanner({ adminId }) {
           }))
         );
         const names = toAward.map((p) => p.title).join(", ");
-        alert(`Visita registrada. ¡Ganaste: ${names}!`);
+        toast.success(`Visita registrada. ¡Ganaste: ${names}!`);
         return;
       }
     }
-    alert("Visita registrada");
+    toast.success("Visita registrada");
   }
 
   function stopScan() {
     codeReaderRef.current?.reset();
+    setCameraError("");
   }
 
   return (
     <div className="max-w-full overflow-hidden">
       <h3 className="text-base sm:text-lg font-semibold text-neutral-900 mb-1">Escanear código QR</h3>
-      <p className="text-neutral-500 text-sm mb-3 sm:mb-4">Apunta la cámara al código QR del usuario.</p>
+      <p className="text-neutral-500 text-sm mb-3 sm:mb-4">
+        Pulsa "Iniciar cámara" para solicitar permisos y escanear el código QR del usuario.
+      </p>
+
+      {cameraError && (
+        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-700" role="alert">
+          {cameraError}
+        </div>
+      )}
+
       <div className="rounded-xl overflow-hidden border border-neutral-200 bg-neutral-900 aspect-video max-h-56 sm:max-h-72 lg:max-h-80 mb-4">
-        <video ref={videoRef} className="w-full h-full object-cover" />
+        <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
       </div>
       <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
-        <button type="button" className="btn-neutral w-full sm:w-auto min-h-[2.75rem]" onClick={startScan}>
-          Iniciar cámara
+        <button
+          type="button"
+          className="btn-neutral w-full sm:w-auto min-h-[2.75rem]"
+          onClick={startScan}
+          disabled={scanning}
+        >
+          {scanning ? "Escaneando..." : "Iniciar cámara"}
         </button>
         <button type="button" className="btn-neutral-outline w-full sm:w-auto min-h-[2.75rem]" onClick={stopScan}>
           Detener
