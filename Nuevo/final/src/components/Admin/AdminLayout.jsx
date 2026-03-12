@@ -1,4 +1,3 @@
-// src/components/Admin/AdminLayout.jsx
 import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Navbar from "../Shared/Navbar";
@@ -25,7 +24,10 @@ export default function AdminLayout({ profile }) {
       <header className="bg-white border-b border-neutral-200">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex justify-between items-center gap-3">
           <p className="text-xs sm:text-sm text-neutral-600 min-w-0 truncate">
-            Hola, <span className="font-medium text-neutral-900">{profile.email}</span>
+            Hola,{" "}
+            <span className="font-medium text-neutral-900">
+              {profile.email}
+            </span>
           </p>
           <button
             type="button"

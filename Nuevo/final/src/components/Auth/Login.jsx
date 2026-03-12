@@ -4,7 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 
 function getLoginErrorMessage(error) {
   const msg = error?.message?.toLowerCase() ?? "";
-  if (msg.includes("invalid login credentials") || msg.includes("invalid_credentials")) {
+  if (
+    msg.includes("invalid login credentials") ||
+    msg.includes("invalid_credentials")
+  ) {
     return "Correo o contraseña incorrectos. Verifica tus datos e intenta de nuevo.";
   }
   if (msg.includes("email not confirmed")) {
@@ -30,18 +33,36 @@ export default function Login() {
 
     const emailTrim = email.trim();
     const passwordTrim = password.trim();
-    if (!emailTrim || !passwordTrim) {
-      setError("Completa correo y contraseña para iniciar sesión.");
+
+    if (!emailTrim && !passwordTrim) {
+      setError("Ingresa tu correo electrónico y contraseña para iniciar sesión.");
+      return;
+    }
+    if (!emailTrim) {
+      setError("Ingresa tu correo electrónico.");
+      return;
+    }
+    if (!passwordTrim) {
+      setError("Ingresa tu contraseña.");
+      return;
+    }
+    if (passwordTrim.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim)) {
+      setError("Ingresa un correo electrónico válido.");
       return;
     }
 
     setLoading(true);
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: emailTrim,
-        password: passwordTrim,
-      });
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email: emailTrim,
+          password: passwordTrim,
+        });
 
       if (signInError) {
         setError(getLoginErrorMessage(signInError));
@@ -66,17 +87,21 @@ export default function Login() {
         <h1 className="text-xl font-semibold text-neutral-900 tracking-tight">
           Iniciar sesión
         </h1>
-        <p className="text-neutral-500 text-sm mt-1 mb-6">
-          Accede a tu cuenta
-        </p>
+        <p className="text-neutral-500 text-sm mt-1 mb-6">Accede a tu cuenta</p>
         <form onSubmit={handleLogin} autoComplete="on" className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-700" role="alert">
+            <div
+              className="rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-700"
+              role="alert"
+            >
               {error}
             </div>
           )}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-neutral-700 mb-1.5"
+            >
               Correo
             </label>
             <input
@@ -86,12 +111,18 @@ export default function Login() {
               className="input-neutral"
               placeholder="tu@ejemplo.com"
               value={email}
-              onChange={(e) => { setEmail(e.target.value); setError(""); }}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
               autoComplete="email"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1.5">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-neutral-700 mb-1.5"
+            >
               Contraseña
             </label>
             <input
@@ -101,7 +132,10 @@ export default function Login() {
               className="input-neutral"
               placeholder="••••••••"
               value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(""); }}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
               autoComplete="current-password"
             />
           </div>
@@ -115,7 +149,10 @@ export default function Login() {
         </form>
         <p className="mt-6 text-center text-sm text-neutral-500">
           ¿No tienes cuenta?{" "}
-          <Link to="/signup" className="font-medium text-neutral-700 hover:text-neutral-900 underline underline-offset-2">
+          <Link
+            to="/signup"
+            className="font-medium text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
+          >
             Regístrate
           </Link>
         </p>
