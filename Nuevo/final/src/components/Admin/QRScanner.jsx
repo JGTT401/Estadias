@@ -6,28 +6,62 @@ import { useToast } from "../../context/ToastContext";
 export default function QRScanner({ adminId }) {
   const videoRef = useRef(null);
   const codeReaderRef = useRef(null);
+  const scanSessionIdRef = useRef(0);
+  const stopRequestedRef = useRef(false);
   const [scanning, setScanning] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const toast = useToast();
+
+  function cleanupCamera() {
+    const video = videoRef.current;
+    const stream = video?.srcObject;
+    if (stream && typeof stream.getTracks === "function") {
+      stream.getTracks().forEach((t) => t.stop());
+    }
+    if (video) video.srcObject = null;
+  }
 
   async function startScan() {
     setCameraError("");
     if (!videoRef.current) return;
 
+    // Invalidate any previous decode callbacks.
+    scanSessionIdRef.current += 1;
+    const sessionId = scanSessionIdRef.current;
+    stopRequestedRef.current = false;
+
     try {
       setScanning(true);
       codeReaderRef.current = new BrowserMultiFormatReader();
+
+      // Make sure previous camera usage is fully released.
+      cleanupCamera();
+
       await codeReaderRef.current.decodeFromVideoDevice(
         null,
         videoRef.current,
         (result) => {
+          if (stopRequestedRef.current) return;
+          if (sessionId !== scanSessionIdRef.current) return;
           if (result) {
-            handleResult(result.getText());
-            codeReaderRef.current?.reset();
+            // We are intentionally stopping after a successful read.
+            stopRequestedRef.current = true;
+            void handleResult(result.getText());
+            // One-shot scanning: stop immediately after a successful read.
+            try {
+              codeReaderRef.current?.reset?.();
+            } catch {
+              // ignore
+            }
+            setScanning(false);
+            cleanupCamera();
           }
         },
       );
     } catch (err) {
+      // If the user pressed "Detener", don't show an error toast.
+      if (stopRequestedRef.current || sessionId !== scanSessionIdRef.current) return;
+
       console.error(err);
       const msg = err?.message ?? String(err);
       if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("not allowed")) {
@@ -39,7 +73,9 @@ export default function QRScanner({ adminId }) {
       }
       toast.error("No se pudo iniciar la cámara");
     } finally {
-      setScanning(false);
+      if (sessionId === scanSessionIdRef.current) {
+        setScanning(false);
+      }
     }
   }
 
@@ -114,8 +150,15 @@ export default function QRScanner({ adminId }) {
   }
 
   function stopScan() {
-    codeReaderRef.current?.reset();
+    stopRequestedRef.current = true;
+    setScanning(false);
     setCameraError("");
+    try {
+      codeReaderRef.current?.reset?.();
+    } catch {
+      // ignore
+    }
+    cleanupCamera();
   }
 
   return (
