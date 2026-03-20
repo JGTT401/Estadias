@@ -1,0 +1,49 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.messages (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  admin_id uuid,
+  title text NOT NULL,
+  body text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT messages_pkey PRIMARY KEY (id),
+  CONSTRAINT messages_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  email text NOT NULL,
+  role text NOT NULL CHECK (role = ANY (ARRAY['admin'::text, 'user'::text])),
+  qr_code text UNIQUE,
+  visits integer DEFAULT 0,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.promotions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  description text,
+  min_visits integer DEFAULT 0,
+  active boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT promotions_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.scans (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  admin_id uuid,
+  user_id uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT scans_pkey PRIMARY KEY (id),
+  CONSTRAINT scans_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES public.profiles(id),
+  CONSTRAINT scans_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+);
+CREATE TABLE public.user_promotions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid,
+  promotion_id uuid,
+  awarded_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT user_promotions_pkey PRIMARY KEY (id),
+  CONSTRAINT user_promotions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
+  CONSTRAINT user_promotions_promotion_id_fkey FOREIGN KEY (promotion_id) REFERENCES public.promotions(id)
+);
