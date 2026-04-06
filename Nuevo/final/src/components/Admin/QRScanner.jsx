@@ -10,6 +10,7 @@ export default function QRScanner({ adminId }) {
   const stopRequestedRef = useRef(false);
   const [scanning, setScanning] = useState(false);
   const [cameraError, setCameraError] = useState("");
+  const [rewardResult, setRewardResult] = useState(null);
   const toast = useToast();
 
   function cleanupCamera() {
@@ -23,6 +24,7 @@ export default function QRScanner({ adminId }) {
 
   async function startScan() {
     setCameraError("");
+    setRewardResult(null);
     if (!videoRef.current) return;
 
     // Invalidate any previous decode callbacks.
@@ -142,10 +144,15 @@ export default function QRScanner({ adminId }) {
           }))
         );
         const names = toAward.map((p) => p.title).join(", ");
+        setRewardResult({
+          promotions: toAward.map((p) => p.title),
+          visits: newVisits,
+        });
         toast.success(`Visita registrada. ¡Ganaste: ${names}!`);
         return;
       }
     }
+    setRewardResult(null);
     toast.success("Visita registrada");
   }
 
@@ -153,6 +160,7 @@ export default function QRScanner({ adminId }) {
     stopRequestedRef.current = true;
     setScanning(false);
     setCameraError("");
+    setRewardResult(null);
     try {
       codeReaderRef.current?.reset?.();
     } catch {
@@ -190,6 +198,28 @@ export default function QRScanner({ adminId }) {
           Detener
         </button>
       </div>
+
+      {rewardResult && (
+        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5 shadow-sm" role="status">
+          <p className="text-sm font-semibold text-emerald-900 mb-1">Promocion ganada</p>
+          <p className="text-sm text-emerald-800">
+            Se registro la visita y el usuario recibio beneficio por su fidelidad.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {rewardResult.promotions.map((promo) => (
+              <span
+                key={promo}
+                className="inline-flex items-center rounded-full bg-white border border-emerald-200 px-2.5 py-1 text-xs font-medium text-emerald-800"
+              >
+                {promo}
+              </span>
+            ))}
+          </div>
+          <p className="mt-3 text-xs sm:text-sm text-emerald-900">
+            Visitas acumuladas: <span className="font-semibold">{rewardResult.visits}</span>
+          </p>
+        </div>
+      )}
     </div>
   );
 }
