@@ -19,19 +19,19 @@ export default function AdminLayout({ profile }) {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-100">
+    <div className="min-h-screen bg-brand-surface">
       <Navbar items={items} />
-      <header className="bg-white border-b border-neutral-200">
+      <header className="bg-brand-cream/90 border-b border-brand-800/15 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex justify-between items-center gap-3">
-          <p className="text-xs sm:text-sm text-neutral-600 min-w-0 truncate">
+          <p className="text-xs sm:text-sm text-brand-900/70 min-w-0 truncate">
             Hola,{" "}
-            <span className="font-medium text-neutral-900">
+            <span className="font-medium text-brand-950">
               {profile.email}
             </span>
           </p>
           <button
             type="button"
-            className="flex-shrink-0 px-3 py-2 sm:px-4 rounded-lg text-sm font-medium bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-400 min-h-[2.75rem]"
+            className="flex-shrink-0 px-3 py-2 sm:px-4 rounded-lg text-sm font-medium bg-white border border-brand-800/20 text-brand-900 hover:bg-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-500/50 min-h-[2.75rem]"
             onClick={handleLogout}
           >
             Cerrar sesión

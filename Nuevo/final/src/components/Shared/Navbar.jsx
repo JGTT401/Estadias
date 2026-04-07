@@ -4,19 +4,20 @@ import { NavLink } from "react-router-dom";
 const linkClass = ({ isActive }) =>
   `block px-4 py-3 rounded-lg text-sm font-medium transition-colors md:py-2.5 md:px-4 ${
     isActive
-      ? "bg-neutral-800 text-white"
-      : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+      ? "bg-brand-500 text-white shadow-sm"
+      : "text-white/85 hover:bg-white/10 hover:text-white"
   }`;
 
 function Navbar({ items = [] }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="bg-white border-b border-neutral-200">
+    <nav className="bg-brand-800 border-b border-brand-950/25 shadow-md shadow-brand-950/10">
       <div className="max-w-6xl mx-auto px-3 sm:px-6">
         <div className="flex items-center justify-between h-14 min-h-[3.5rem]">
-          <span className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight">
-            MiApp
+          <span className="text-base sm:text-lg font-semibold text-white tracking-tight">
+            <span className="text-brand-300">K</span>
+            <span className="text-white">'empanadas</span>
           </span>
 
           {/* enlaces inline desktop*/}
@@ -36,8 +37,9 @@ function Navbar({ items = [] }) {
           {/* botón menú movil*/}
           <button
             type="button"
-            className="md:hidden p-2 -mr-2 rounded-lg text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-300 aria-expanded={open}"
+            className="md:hidden p-2 -mr-2 rounded-lg text-white/90 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-300/60"
             onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
             aria-label={open ? "Cerrar menú" : "Abrir menú"}
           >
             <span className="sr-only">
@@ -79,7 +81,7 @@ function Navbar({ items = [] }) {
 
         {/* menú desplegable movil*/}
         {open && (
-          <div className="md:hidden py-2 border-t border-neutral-100">
+          <div className="md:hidden py-2 border-t border-white/15">
             <div className="flex flex-col gap-0.5">
               {items.map((i) => (
                 <NavLink

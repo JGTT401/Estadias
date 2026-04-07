@@ -107,8 +107,8 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-100 flex flex-col justify-center px-3 py-6 sm:px-4 sm:py-12">
-      <div className="max-w-md mx-auto w-full bg-white rounded-2xl border border-neutral-200 shadow-sm p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-brand-surface flex flex-col justify-center px-3 py-6 sm:px-4 sm:py-12">
+      <div className="max-w-md mx-auto w-full bg-white rounded-2xl border border-brand-800/15 shadow-md shadow-brand-950/5 p-4 sm:p-6 lg:p-8">
         <h1 className="text-xl font-semibold text-neutral-900 tracking-tight">
           Crear cuenta
         </h1>
@@ -179,7 +179,7 @@ export default function Signup() {
           ¿Ya tienes cuenta?{" "}
           <Link
             to="/login"
-            className="font-medium text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
+            className="font-medium text-brand-800 hover:text-brand-950 underline underline-offset-2"
           >
             Inicia sesión
           </Link>

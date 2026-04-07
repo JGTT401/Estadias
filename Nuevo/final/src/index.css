@@ -4,12 +4,27 @@
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* Kempanadas: terracota, naranja vivo, fondo melocotón (alineado con el logo) */
+@theme {
+  --color-brand-950: #5c1f0d;
+  --color-brand-900: #7c2d12;
+  --color-brand-800: #c83e1a;
+  --color-brand-700: #d3411a;
+  --color-brand-600: #e85a2e;
+  --color-brand-500: #f7941d;
+  --color-brand-400: #fb9f3a;
+  --color-brand-300: #ffc078;
+  --color-brand-surface: #fcd5b5;
+  --color-brand-cream: #fff4e8;
+  --color-brand-steam: #a9a9a9;
+}
+
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply antialiased text-neutral-800 bg-neutral-100 min-h-screen;
+    @apply antialiased text-neutral-900 bg-brand-surface min-h-screen;
     min-height: 100dvh;
     overflow-x: hidden;
     padding-left: env(safe-area-inset-left);
@@ -19,15 +34,15 @@
 
 @layer components {
   .input-neutral {
-    @apply w-full px-4 py-2.5 rounded-lg border border-neutral-200 bg-white text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-neutral-400 transition-shadow min-h-[2.75rem];
+    @apply w-full px-4 py-2.5 rounded-lg border border-brand-800/20 bg-white text-neutral-900 placeholder-brand-steam focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-shadow min-h-[2.75rem];
   }
   .btn-neutral {
-    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-neutral-800 text-white hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[2.75rem];
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-brand-800 text-white hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-brand-surface disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[2.75rem];
   }
   .btn-neutral-outline {
-    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300 transition-colors min-h-[2.75rem];
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-white border border-brand-800/25 text-brand-900 hover:bg-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-500/40 transition-colors min-h-[2.75rem];
   }
   .card-neutral {
-    @apply bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden;
+    @apply bg-white rounded-xl border border-brand-800/12 shadow-sm shadow-brand-950/5 overflow-hidden;
   }
 }

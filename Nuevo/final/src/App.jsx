@@ -20,10 +20,10 @@ export default function App() {
   const { user, profile, loading } = useAuth();
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-100 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-surface flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block w-8 h-8 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-neutral-600 text-sm">Cargando...</p>
+          <div className="inline-block w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-3" />
+          <p className="text-brand-900/70 text-sm">Cargando...</p>
         </div>
       </div>
     );
