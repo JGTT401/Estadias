@@ -1,3 +1,9 @@
+# K'empanadas — aplicación web (React + Vite + Supabase)
+
+**Instalación y puesta en marcha (cliente / equipo técnico):** consulta **[MANUAL_INSTALACION.md](./MANUAL_INSTALACION.md)** (español).
+
+---
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
